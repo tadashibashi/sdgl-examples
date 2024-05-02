@@ -22,6 +22,7 @@ private:
 
     bool init() override
     {
+        bat.init();
         cam.setOrigin({});
 
         int w, h;
@@ -75,7 +76,7 @@ private:
         window()->clear({255, 255, 255, 255});
 
         bat.begin(cam.getMatrix());
-        bat.drawTexture(diceImage, {0, 0, diceImage.size().x, diceImage.size().y}, dicePos, Color::White,
+        bat.drawTexture(diceImage, dicePos, Color::White,
             {1.f, 1.f}, {diceImage.size().x/2.f, diceImage.size().y/2.f}, 0, 0);
         bat.end();
     }
