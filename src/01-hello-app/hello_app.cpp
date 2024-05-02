@@ -6,6 +6,7 @@
 #include "sdgl/graphics/SpriteBatch2D.h"
 
 using namespace sdgl;
+
 class MyApp final : public App {
 public:
     MyApp() : App("Hello App", 640, 480)
@@ -21,7 +22,6 @@ private:
 
     bool init() override
     {
-        bat.init();
         cam.setOrigin({});
 
         int w, h;
