@@ -1,0 +1,3 @@
+[submodule "lib/sdgl"]
+	path = lib/sdgl
+	url = https://github.com/tadashibashi/sdgl
