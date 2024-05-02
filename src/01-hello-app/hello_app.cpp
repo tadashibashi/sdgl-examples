@@ -16,73 +16,67 @@ public:
 private:
     SpriteBatch2D bat;
     Camera2D cam;
+    Texture2D diceImage;
+    Vector2 dicePos;
 
     bool init() override
     {
         bat.init();
         cam.setOrigin({});
+
+        int w, h;
+        window()->getSize(&w, &h);
+        cam.setViewport({0, 0, w, h});
+        diceImage.loadFile("assets/dice.png");
+        dicePos = {w/2.f, h/2.f};
         return true;
     }
 
     void update() override
     {
-        ImGui::ShowDemoWindow();
+        auto input = window()->input();
+        Vector2 movement;
 
-        auto &input = *window()->input();
-
-        if (ImGui::Begin("Debug"))
+        if (input->isDown(Key::Right))
         {
-            ImGui::Text("Delta time: %f", getDeltaTime());
-            ImGui::Text("App time: %f", getTime());
-
-            if (input.isDown(Key::C))
-            {
-                ImGui::Text("C is down!");
-            }
-
-            if (input.isDown(MouseBtn::Right))
-            {
-                ImGui::Text("Mouse right is down");
-            }
-
-            if (input.isDown(0, GamepadBtn::StickLeft))
-            {
-                ImGui::Text("Pressed left stick!");
-            }
-
-            if (input.isDown(0, GamepadBtn::A))
-            {
-                ImGui::Text("Pressing X");
-            }
-
-            const auto leftTrigAxis = input.getAxis(0, GamepadAxis::TriggerLeft);
-            ImGui::Text("Left trigger: %f", leftTrigAxis);
-
-            const auto leftX = input.getAxis(0, GamepadAxis::LeftX);
-
-            ImGui::Text("Left axis X: %f", leftX);
-
-            float mouseX, mouseY;
-            input.getMousePosition(&mouseX, &mouseY);
-            ImGui::Text("Mouse position: %f, %f", mouseX, mouseY);
-
-
-        }
-        ImGui::End();
-
-        if (input.isDoubleClicked(MouseBtn::Left))
-        {
-            DEBUG_LOG("Mouse left button was double-clicked!");
+            movement += Vector2(4.f, 0);
         }
 
+        if (input->isDown(Key::Left))
+        {
+            movement -= Vector2(4.f, 0);
+        }
 
+        if (input->isDown(Key::Up))
+        {
+            movement -= Vector2(0, 4.f);
+        }
+
+        if (input->isDown(Key::Down))
+        {
+            movement += Vector2(0, 4.f);
+        }
+
+        if (auto axisX = input->getAxis(0, GamepadAxis::LeftX); std::abs(axisX) > .1f)
+        {
+            movement += Vector2(axisX * 4.f, 0);
+        }
+
+        if (auto axisY = input->getAxis(0, GamepadAxis::LeftY); std::abs(axisY) > .1f)
+        {
+            movement += Vector2(0, axisY * 4.f);
+        }
+
+        cam.setPosition(cam.getPosition() + movement);
     }
 
     void render() override
     {
         window()->clear({255, 255, 255, 255});
-        bat.begin(cam.getMatrix());
 
+        bat.begin(cam.getMatrix());
+        bat.drawTexture(diceImage, {0, 0, diceImage.size().x, diceImage.size().y}, dicePos, Color::White,
+            {1.f, 1.f}, {diceImage.size().x/2.f, diceImage.size().y/2.f}, 0, 0);
         bat.end();
     }
 
