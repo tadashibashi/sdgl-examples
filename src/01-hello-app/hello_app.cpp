@@ -1,24 +1,28 @@
 #include <sdgl/App.h>
 #include <sdgl/Camera2D.h>
 #include <sdgl/logging.h>
-#include <imgui.h>
 
-#include "sdgl/graphics/SpriteBatch2D.h"
-
+#include <sdgl/graphics/SpriteBatch2D.h>
 using namespace sdgl;
 
-class MyApp final : public App {
+struct Dice {
+    Vector2 position;
+    float rotation{0};
+    float scale{1.f};
+    Texture2D image;
+};
+
+class HelloApp final : public App {
 public:
-    MyApp() : App("Hello App", 640, 480)
+    HelloApp() : App("Hello App", 640, 480)
     {
 
     }
 
 private:
-    SpriteBatch2D bat;
-    Camera2D cam;
-    Texture2D diceImage;
-    Vector2 dicePos;
+    SpriteBatch2D bat{};
+    Camera2D cam{};
+    Dice dice{};
 
     bool init() override
     {
@@ -28,8 +32,9 @@ private:
         int w, h;
         window()->getSize(&w, &h);
         cam.setViewport({0, 0, w, h});
-        diceImage.loadFile("assets/dice.png");
-        dicePos = {w/2.f, h/2.f};
+        auto imageLoadResult = dice.image.loadFile("assets/dice.png");
+        dice.position = {w/2.f, h/2.f};
+
         return true;
     }
 
@@ -37,6 +42,8 @@ private:
     {
         auto input = window()->input();
         Vector2 movement;
+        float rotation = 0;
+        float scale = 1.f;
 
         if (input->isDown(Key::Right))
         {
@@ -68,7 +75,29 @@ private:
             movement += Vector2(0, axisY * 4.f);
         }
 
-        cam.setPosition(cam.getPosition() + movement);
+        if (auto axisTriggerLeft = input->getAxis(0, GamepadAxis::TriggerLeft))
+        {
+            rotation -= axisTriggerLeft * 4.f;
+        }
+
+        if (auto axisTriggerRight = input->getAxis(0, GamepadAxis::TriggerRight))
+        {
+            rotation += axisTriggerRight * 4.f;
+        }
+
+        if (input->isDown(0, GamepadBtn::A) || input->isDown(Key::Z))
+        {
+            scale += .1f;
+        }
+
+        if (input->isDown(0, GamepadBtn::B) || input->isDown(Key::X))
+        {
+            scale -= .1f;
+        }
+
+        dice.position += movement;
+        dice.rotation += rotation;
+        dice.scale *= scale;
     }
 
     void render() override
@@ -76,19 +105,19 @@ private:
         window()->clear({255, 255, 255, 255});
 
         bat.begin(cam.getMatrix());
-        bat.drawTexture(diceImage, dicePos, Color::White,
-            {1.f, 1.f}, {diceImage.size().x/2.f, diceImage.size().y/2.f}, 0, 0);
+        bat.drawTexture(dice.image, dice.position, Color::White,
+            {dice.scale, dice.scale}, {dice.image.size().x/2.f, dice.image.size().y/2.f}, mathf::toRadians(dice.rotation), 0);
         bat.end();
     }
 
     void shutdown() override
     {
-
+        dice.image.unload();
     }
 };
 
 int main(int argc, char *argv[])
 {
-    MyApp().run(argc, argv);
+    HelloApp().run(argc, argv);
     return 0;
 }
