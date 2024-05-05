@@ -9,6 +9,6 @@ list(APPEND SOURCE
 
 add_sdgl_executable(${PROJECT_NAME}
     CONTENT_ROOT assets
-    CONTENT ""
+    CONTENT pong.fnt pong_0.png
     SOURCE ${SOURCE}
 )
