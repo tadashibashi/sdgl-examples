@@ -43,7 +43,7 @@ public:
 
     void set(int x, int y, T value)
     {
-        static_assert(x >= 0 && x < Width && y >= 0 && y < Height);
+        SDGL_ASSERT(x >= 0 && x < Width && y >= 0 && y < Height);
 
         m_grid[y * Width + x] = value;
     }

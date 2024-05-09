@@ -7,8 +7,19 @@ list(APPEND SOURCE
     Ball.h Ball.cpp
 )
 
+if (EMSCRIPTEN)
+    set(CMAKE_EXECUTABLE_SUFFIX .html)
+endif()
+
 add_sdgl_executable(${PROJECT_NAME}
     CONTENT_ROOT assets
-    CONTENT pong.fnt pong_0.png
+    CONTENT
+        # fonts
+        pong.fnt pong_0.png
+
+        # sounds
+        paddle_hit_01.wav paddle_hit_02.wav wall_hit.wav
+        win.wav lose.wav
+        player_score.wav computer_score.wav
     SOURCE ${SOURCE}
 )

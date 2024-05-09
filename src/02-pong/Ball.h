@@ -5,10 +5,11 @@
 using namespace sdgl;
 
 const float BallWidth = 16.f;
+const float BallMaxSpeed = 2400.f;
 
 class Ball {
 public:
-    Ball(int left, int top, int right, int bottom);
+    Ball(int left, int top, int right, int bottom, Paddle *player, Paddle *computer);
     void update(float deltaTime);
     void draw(SpriteBatch *batch);
 
@@ -19,6 +20,8 @@ public:
     void speed(float value) { m_speed = value; }
 
     Delegate<Paddle::PaddleId> onScore;
+    Delegate<Paddle::PaddleId> onPaddleHit;
+    Delegate<> onWallHit;
 
     [[nodiscard]]
     Vector2 position() const { return m_position; }
@@ -32,4 +35,6 @@ private:
     float m_direction;  // angle in degrees, where 0 is up
 
     int m_left, m_top, m_right, m_bottom;
+
+    Paddle *m_player, *m_computer;
 };
