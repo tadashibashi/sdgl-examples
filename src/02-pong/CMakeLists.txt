@@ -7,10 +7,6 @@ list(APPEND SOURCE
     Ball.h Ball.cpp
 )
 
-if (EMSCRIPTEN)
-    set(CMAKE_EXECUTABLE_SUFFIX .html)
-endif()
-
 add_sdgl_executable(${PROJECT_NAME}
     CONTENT_ROOT assets
     CONTENT
