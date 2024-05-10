@@ -4,8 +4,8 @@
 
 using namespace sdgl;
 
-const float BallWidth = 16.f;
-const float BallMaxSpeed = 2400.f;
+const float BallWidth = 8.f;
+const float BallMaxSpeed = 1200.f;
 
 class Ball {
 public:

@@ -50,18 +50,18 @@ protected:
         score[1] = 0;
 
         int fw, fh;
-        window()->getFrameBufferSize(&fw, &fh);
+        window()->getSize(&fw, &fh);
         ball->position({(float)fw/2.f, (float)fh/2.f});
-        ball->direction((mathf::rand(90.f) - 45.f) + (mathf::chance(.5f) ? 0 : 180.f));
-        ball->speed(400.f);
+        ball->direction((mathf::rand(45.f) - 22.5f) + (mathf::chance(.5f) ? 0 : 180.f));
+        ball->speed(250.f);
 
         player->position({
-            8,
-            static_cast<float>(fh) / 2.f - 128.f
+            4,
+            static_cast<float>(fh) / 2.f - 64.f
         });
         computer->position({
-            static_cast<float>(fw) - 40.f,
-            static_cast<float>(fh) / 2.f - 128.f
+            static_cast<float>(fw) - 20.f,
+            static_cast<float>(fh) / 2.f - 64.f
         });
 
         scoreText[0].setText(std::to_string(score[0]));
@@ -83,11 +83,11 @@ protected:
         SDGL_LOG("Is font loaded?: {}", font.isLoaded());
 
         int fw, fh;
-        window()->getFrameBufferSize(&fw, &fh);
+        window()->getSize(&fw, &fh);
 
         // create paddles
-        player = new Paddle(32, 256, 0, fh, Color::White, Paddle::Player);
-        computer = new Paddle(32, 256, 0, fh, Color::White, Paddle::Computer);
+        player = new Paddle(16, 128, 0, fh, Color::White, Paddle::Player);
+        computer = new Paddle(16, 128, 0, fh, Color::White, Paddle::Computer);
 
         // init camera
         cam.setViewport({0, 0, fw, fh});
@@ -143,9 +143,9 @@ protected:
         else
         {
             int fw, fh;
-            window()->getFrameBufferSize(&fw, &fh);
+            window()->getSize(&fw, &fh);
             ball->position({(float)fw/2.f, (float)fh/2.f});
-            ball->direction((mathf::rand(90.f) - 45.f) + (mathf::chance(.5f) ? 0 : 180.f));
+            ball->direction((mathf::rand(45.f) - 22.5f) + (mathf::chance(.5f) ? 0 : 180.f));
             pauseCountDown = 2.f;
 
             sndScore[id]->play();
@@ -200,7 +200,7 @@ protected:
         window()->clear({20, 20, 20, 255});
 
         int w, h;
-        window()->getFrameBufferSize(&w, &h);
+        window()->getSize(&w, &h);
 
         batch.begin(cam.getMatrix());
 

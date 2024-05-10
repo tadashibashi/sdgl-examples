@@ -42,9 +42,8 @@ void Ball::update(float deltaTime)
         const auto checkPos = trajectory + (Point)m_position;
         const auto checkRect = Rectangle{checkPos.x, checkPos.y, (int)BallWidth, (int)BallWidth};
 
-        // player paddle collision
+        // Check collision with player paddle
         const auto playerBounds = m_player->bounds();
-
         if (mathf::intersects(playerBounds, checkRect))
         {
             // simulate rounded paddle shape: calculate offset the paddle angle by which the ball bounces off
@@ -53,7 +52,6 @@ void Ball::update(float deltaTime)
             angleOffsetPercent = mathf::clamp(angleOffsetPercent, -1.f, 1.f);
 
             const auto intersect = intersection(playerBounds, checkRect);
-
             if (intersect.w > intersect.h)
             {
                 if (intersect.y == playerBounds.y) // collision from top
@@ -63,7 +61,7 @@ void Ball::update(float deltaTime)
                     if (trajectory.y > 0)
                         m_direction += (-m_direction + 180.f) * 2.f;
                 }
-                else                             // collision from bottom
+                else                              // collision from bottom
                 {
                     m_position.y -= (m_position.y - playerBounds.bottom());
                     auto oldDir = m_direction;
@@ -74,7 +72,12 @@ void Ball::update(float deltaTime)
             }
             else
             {
-                m_direction += (90.f + maxAngleOffset * angleOffsetPercent - m_direction + 180.f) * 2.f;
+                auto newDir = mathf::wrap((90.f + maxAngleOffset * angleOffsetPercent - m_direction + 180.f) * 2.f + m_direction, 0, 360);
+                if (newDir > 85 && newDir < 180)
+                    newDir = 85;
+                else if (newDir < 275 && newDir >= 180)
+                    newDir = 275;
+                m_direction = newDir;
                 m_position.x -= (m_position.x - playerBounds.right());
             }
 
@@ -82,9 +85,8 @@ void Ball::update(float deltaTime)
             break;
         }
 
-        // computer paddle collision
+        // Check collision with computer paddle
         const auto compBounds = m_computer->bounds();
-
         if (mathf::intersects(compBounds, checkRect))
         {
             // simulate rounded paddle shape: calculate offset the paddle angle by which the ball bounces off
@@ -94,16 +96,16 @@ void Ball::update(float deltaTime)
 
             const auto intersect = intersection(compBounds, checkRect);
 
-            if (intersect.w > intersect.h)
+            if (intersect.w > intersect.h) // vertical collision
             {
-                if (intersect.y == compBounds.y) // collision from top
+                if (intersect.y == compBounds.y) // from top
                 {
                     m_position.y -= (m_position.y + BallWidth - compBounds.top());
                     auto oldDir = m_direction;
                     if (trajectory.y > 0)
                         m_direction += (-m_direction + 180.f) * 2.f;
                 }
-                else                             // collision from bottom
+                else                             // from bottom
                 {
                     m_position.y -= (m_position.y - compBounds.bottom());
                     auto oldDir = m_direction;
@@ -112,13 +114,14 @@ void Ball::update(float deltaTime)
                         m_direction += (-m_direction + 180.f) * 2.f;
                 }
             }
-            else
+            else                            // horizontal collision
             {
-                m_direction += (90.f - maxAngleOffset * angleOffsetPercent - m_direction + 180.f) * 2.f;
+
+                auto newDir = mathf::wrap((90.f - maxAngleOffset * angleOffsetPercent - m_direction + 180.f) * 2.f + m_direction, 0, 360.f);
+                m_direction = mathf::clamp(newDir, 95, 265.f); // make sure direction bounces back toward center
+
                 m_position.x -= (m_position.x + BallWidth - compBounds.left());
             }
-
-
 
             hitPaddle = 1;
             break;
@@ -127,7 +130,7 @@ void Ball::update(float deltaTime)
 
     if (hitPaddle != -1)
     {
-        m_speed *= 1.05f;
+        m_speed *= 1.02f;
         if (m_speed > BallMaxSpeed)
         {
             m_speed = BallMaxSpeed;
@@ -137,8 +140,8 @@ void Ball::update(float deltaTime)
 
     // apply motion
     auto motion = mathf::trajectory(mathf::toRadians(m_direction), m_speed * deltaTime);
-    if (abs(motion.x) < 4.f) // min x speed
-        motion.x = motion.x < 0 ? -4.f : 4.f;
+    if (abs(motion.x) < 2.f) // min x speed
+        motion.x = motion.x < 0 ? -2.f : 2.f;
 
     m_position += motion;
 
