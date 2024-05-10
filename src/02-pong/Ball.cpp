@@ -73,6 +73,8 @@ void Ball::update(float deltaTime)
             else
             {
                 auto newDir = mathf::wrap((90.f + maxAngleOffset * angleOffsetPercent - m_direction + 180.f) * 2.f + m_direction, 0, 360);
+
+                // make sure direction bounces back toward center
                 if (newDir > 85 && newDir < 180)
                     newDir = 85;
                 else if (newDir < 275 && newDir >= 180)
@@ -89,7 +91,7 @@ void Ball::update(float deltaTime)
         const auto compBounds = m_computer->bounds();
         if (mathf::intersects(compBounds, checkRect))
         {
-            // simulate rounded paddle shape: calculate offset the paddle angle by which the ball bounces off
+            // simulate rounded paddle shape: calculate offset of paddle angle by which the ball bounces off
             constexpr float maxAngleOffset = 20.f;
             float angleOffsetPercent = (ballYCenter - ((float)compBounds.y + (float)compBounds.h / 2.f)) / (compBounds.h / 2.f);
             angleOffsetPercent = mathf::clamp(angleOffsetPercent, -1.f, 1.f);
