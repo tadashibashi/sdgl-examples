@@ -119,7 +119,7 @@ protected:
         return true;
     }
 
-    void handleScore(Paddle::PaddleId id)
+    void handleScore(Paddle::Id id)
     {
         // Increase points
         ++score[id];
@@ -152,7 +152,7 @@ protected:
     }
 
     /// ball hit a paddle
-    void handlePaddleHit(Paddle::PaddleId id)
+    void handlePaddleHit(Paddle::Id id)
     {
         if (sndPaddleHit[id])
             sndPaddleHit[id]->play();

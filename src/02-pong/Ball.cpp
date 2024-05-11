@@ -72,8 +72,8 @@ void Ball::update(float deltaTime)
         }
 
         // Check collision with computer paddle
-        const auto compBounds = m_computer->bounds();
-        if (mathf::intersects(compBounds, checkRect))
+        if (const auto compBounds = m_computer->bounds();
+            mathf::intersects(compBounds, checkRect))
         {
             // simulate rounded paddle shape: calculate offset of paddle angle by which the ball bounces off
             constexpr float maxAngleOffset = 20.f;
@@ -110,14 +110,14 @@ void Ball::update(float deltaTime)
         }
     }
 
-    if (hitPaddle != -1)
+    if (hitPaddle >= 0)
     {
         m_speed *= 1.02f;
         if (m_speed > BallMaxSpeed)
         {
             m_speed = BallMaxSpeed;
         }
-        onPaddleHit((Paddle::PaddleId)hitPaddle);
+        onPaddleHit(static_cast<Paddle::Id>(hitPaddle));
     }
 
     // apply motion
@@ -146,13 +146,13 @@ void Ball::update(float deltaTime)
     {
         m_direction += (90.f - m_direction + 180.f) * 2.f;
         m_position.x -= (m_position.x - m_left) * 2.f;
-        onScore(Paddle::PaddleId::Computer);
+        onScore(Paddle::Id::Computer);
     }
     else if (m_position.x > m_right - BallWidth)
     {
         m_direction += (270.f - m_direction + 180.f) * 2.f;
         m_position.x -= (m_position.x - (m_right - BallWidth)) * 2.f;
-        onScore(Paddle::PaddleId::Player);
+        onScore(Paddle::Id::Player);
     }
 
     // constrain values
