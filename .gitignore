@@ -6,6 +6,7 @@
 
 .DS_Store
 
+clion-build/
 build/
 cmake-build*/
 out/

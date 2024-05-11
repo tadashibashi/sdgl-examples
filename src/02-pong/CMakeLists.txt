@@ -1,4 +1,4 @@
-project(02-pong)
+project(Pong)
 
 list(APPEND SOURCE
     Pong.h Pong.cpp
@@ -16,5 +16,7 @@ add_sdgl_executable(${PROJECT_NAME}
         paddle_hit_01.wav paddle_hit_02.wav wall_hit.wav
         win.wav lose.wav
         player_score.wav computer_score.wav
+    ICON_FILE
+        icon.png
     SOURCE ${SOURCE}
 )
