@@ -1,6 +1,5 @@
 #pragma once
 #include <sdgl/sdgl.h>
-#include "SpriteBatch.h"
 
 using namespace sdgl;
 
@@ -36,7 +35,7 @@ public:
         m_position.y = mathf::clampi(m_position.y, m_yMin, m_yMax - m_size.y);
     }
 
-    void draw(SpriteBatch *batch)
+    void draw(SpriteBatch2D *batch)
     {
         batch->drawRectangle({(int)m_position.x, (int)m_position.y, m_size.x, m_size.y}, m_color);
     }

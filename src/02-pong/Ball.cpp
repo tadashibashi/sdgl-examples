@@ -1,24 +1,13 @@
 #include "Ball.h"
-#include <imgui.h>
 
 Ball::Ball(int left, int top, int right, int bottom, Paddle *player, Paddle *computer) :
-    m_left(left), m_top(top), m_right(right), m_bottom(bottom),
-    m_position(), m_speed(300.f), m_player(player), m_computer(computer)
+    m_position(), m_speed(300.f), m_direction(0), m_left(left),
+    m_top(top), m_right(right), m_bottom(bottom), m_player(player), m_computer(computer)
 {
 }
 
-static constexpr float MaxDeltaTime = 1.f / 60.f * 2.f;
-static constexpr int CollisionGrain = 4;
-
-static Rectangle intersection(const Rectangle &a, const Rectangle &b)
-{
-    auto x = std::max(a.left(), b.left());
-    auto y = std::max(a.top(), b.top());
-    auto right = std::min(a.right(), b.right());
-    auto bottom = std::min(a.bottom(), b.bottom());
-
-    return {x, y, std::max(right - x, 0), std::max(bottom - y, 0)};
-}
+static constexpr float MaxDeltaTime = 1.f / 60.f * 2.f; ///< maximum delta time value to keep physics managable
+static constexpr int CollisionGrain = 4;                ///< divide the target length by this when projecting collision checks
 
 void Ball::update(float deltaTime)
 {
@@ -34,7 +23,6 @@ void Ball::update(float deltaTime)
     // check paddles for collision
     // cast collision check projection with grain
     // TODO: optimize by checking which side ball is on
-
     int hitPaddle = -1;
     for (int i = 1; i < CollisionGrain; ++i)
     {
@@ -43,29 +31,25 @@ void Ball::update(float deltaTime)
         const auto checkRect = Rectangle{checkPos.x, checkPos.y, (int)BallWidth, (int)BallWidth};
 
         // Check collision with player paddle
-        const auto playerBounds = m_player->bounds();
-        if (mathf::intersects(playerBounds, checkRect))
+        if (const auto playerBounds = m_player->bounds(); mathf::intersects(playerBounds, checkRect))
         {
             // simulate rounded paddle shape: calculate offset the paddle angle by which the ball bounces off
             constexpr float maxAngleOffset = 20.f;
             float angleOffsetPercent = (ballYCenter - ((float)playerBounds.y + (float)playerBounds.h / 2.f)) / (playerBounds.h / 2.f);
             angleOffsetPercent = mathf::clamp(angleOffsetPercent, -1.f, 1.f);
 
-            const auto intersect = intersection(playerBounds, checkRect);
-            if (intersect.w > intersect.h)
+            if (const auto intersect = mathf::intersection(playerBounds, checkRect);
+                intersect.w > intersect.h)
             {
                 if (intersect.y == playerBounds.y) // collision from top
                 {
                     m_position.y -= (m_position.y + BallWidth - playerBounds.top());
-                    auto oldDir = m_direction;
                     if (trajectory.y > 0)
                         m_direction += (-m_direction + 180.f) * 2.f;
                 }
                 else                              // collision from bottom
                 {
                     m_position.y -= (m_position.y - playerBounds.bottom());
-                    auto oldDir = m_direction;
-
                     if (trajectory.y < 0)
                         m_direction += (-m_direction + 180.f) * 2.f;
                 }
@@ -96,21 +80,18 @@ void Ball::update(float deltaTime)
             float angleOffsetPercent = (ballYCenter - ((float)compBounds.y + (float)compBounds.h / 2.f)) / (compBounds.h / 2.f);
             angleOffsetPercent = mathf::clamp(angleOffsetPercent, -1.f, 1.f);
 
-            const auto intersect = intersection(compBounds, checkRect);
-
-            if (intersect.w > intersect.h) // vertical collision
+            if (const auto intersect = mathf::intersection(compBounds, checkRect);
+                intersect.w > intersect.h) // vertical collision
             {
                 if (intersect.y == compBounds.y) // from top
                 {
                     m_position.y -= (m_position.y + BallWidth - compBounds.top());
-                    auto oldDir = m_direction;
                     if (trajectory.y > 0)
                         m_direction += (-m_direction + 180.f) * 2.f;
                 }
                 else                             // from bottom
                 {
                     m_position.y -= (m_position.y - compBounds.bottom());
-                    auto oldDir = m_direction;
 
                     if (trajectory.y < 0)
                         m_direction += (-m_direction + 180.f) * 2.f;
@@ -118,7 +99,6 @@ void Ball::update(float deltaTime)
             }
             else                            // horizontal collision
             {
-
                 auto newDir = mathf::wrap((90.f - maxAngleOffset * angleOffsetPercent - m_direction + 180.f) * 2.f + m_direction, 0, 360.f);
                 m_direction = mathf::clamp(newDir, 95, 265.f); // make sure direction bounces back toward center
 
@@ -181,7 +161,7 @@ void Ball::update(float deltaTime)
     m_direction = mathf::wrap(m_direction, 0, 360);
 }
 
-void Ball::draw(SpriteBatch *batch)
+void Ball::draw(SpriteBatch2D *batch)
 {
     batch->drawRectangle(
         {(int)m_position.x, (int)m_position.y, (int)BallWidth, (int)BallWidth}

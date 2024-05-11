@@ -1,13 +1,12 @@
 #pragma once
 #include <sdgl/sdgl.h>
-
-#include "SpriteBatch.h"
 #include "Paddle.h"
 #include "Ball.h"
 
 #include <imgui.h>
 
-const int PointsToWin = 7;
+constexpr int PointsToWin = 7;
+constexpr float MaxServeAngle = 25.f;
 
 using namespace sdgl;
 
@@ -22,7 +21,7 @@ protected:
         Gameover,
     };
 
-    SpriteBatch batch{};
+    SpriteBatch2D batch{};
     Camera2D cam{};
 
     Paddle *player{}, *computer{};
@@ -52,7 +51,7 @@ protected:
         int fw, fh;
         window()->getSize(&fw, &fh);
         ball->position({(float)fw/2.f, (float)fh/2.f});
-        ball->direction((mathf::rand(45.f) - 22.5f) + (mathf::chance(.5f) ? 0 : 180.f));
+        ball->direction((mathf::rand(MaxServeAngle) - MaxServeAngle / 2.f) + (mathf::chance(.5f) ? 0 : 180.f));
         ball->speed(250.f);
 
         player->position({
@@ -80,21 +79,20 @@ protected:
         // load assets
         font.loadBMFont("assets/pong.fnt");
         SDGL_ASSERT(font.isLoaded());
-        SDGL_LOG("Is font loaded?: {}", font.isLoaded());
 
-        int fw, fh;
-        window()->getSize(&fw, &fh);
+        Point winSize;
+        window()->getSize(&winSize.x, &winSize.y);
 
         // create paddles
-        player = new Paddle(16, 128, 0, fh, Color::White, Paddle::Player);
-        computer = new Paddle(16, 128, 0, fh, Color::White, Paddle::Computer);
+        player = new Paddle(16, 128, 0, winSize.y, Color::White, Paddle::Player);
+        computer = new Paddle(16, 128, 0, winSize.y, Color::White, Paddle::Computer);
 
         // init camera
-        cam.setViewport({0, 0, fw, fh});
+        cam.setViewport({0, 0, winSize.x, winSize.y});
         cam.setOrigin({0, 0});
 
         // create ball
-        ball = new Ball(0, 0, fw, fh, player, computer);
+        ball = new Ball(0, 0, winSize.x, winSize.y, player, computer);
 
         ball->onScore += Callback(this, &Pong::handleScore);
         ball->onPaddleHit += Callback(this, &Pong::handlePaddleHit);
@@ -117,16 +115,17 @@ protected:
         sndScore[1]      = audio()->createSound("assets/computer_score.wav");
         sndWin[1]        = audio()->createSound("assets/lose.wav");
 
-        reset();
+        reset(); // start the game
         return true;
     }
 
     void handleScore(Paddle::PaddleId id)
     {
+        // Increase points
         ++score[id];
         scoreText[id].setText(std::to_string(score[id]));
 
-        if (score[id] >= PointsToWin)
+        if (score[id] >= PointsToWin) // player or computer won
         {
             const auto playerWon = score[0] > score[1];
 
@@ -140,24 +139,26 @@ protected:
             else
                 sndWin[1]->play();
         }
-        else
+        else                         // regular score
         {
             int fw, fh;
             window()->getSize(&fw, &fh);
             ball->position({(float)fw/2.f, (float)fh/2.f});
-            ball->direction((mathf::rand(45.f) - 22.5f) + (mathf::chance(.5f) ? 0 : 180.f));
+            ball->direction((mathf::rand(MaxServeAngle) - MaxServeAngle/2.f) + (mathf::chance(.5f) ? 0 : 180.f));
             pauseCountDown = 2.f;
 
             sndScore[id]->play();
         }
     }
 
+    /// ball hit a paddle
     void handlePaddleHit(Paddle::PaddleId id)
     {
         if (sndPaddleHit[id])
             sndPaddleHit[id]->play();
     }
 
+    /// ball hit a wall
     void handleWallHit()
     {
         if (sndWallHit)
@@ -168,30 +169,34 @@ protected:
     {
         const auto delta = static_cast<float>(getDeltaTime());
 
-        if (state == State::Gameplay)
+        switch(state)
         {
-            if (pauseCountDown > 0)
+            case State::Gameplay:
             {
-                pauseCountDown -= delta;
-            }
-            else
-            {
-                ball->update(delta);
-            }
+                if (pauseCountDown > 0)
+                {
+                    pauseCountDown -= delta;
+                }
+                else
+                {
+                    ball->update(delta);
+                }
 
-            if (textTimerCountDown > 0)
-                textTimerCountDown -= delta;
+                if (textTimerCountDown > 0)
+                    textTimerCountDown -= delta;
 
-            computer->update(delta);
-            player->update(delta);
-        }
-        else if (state == State::Gameover)
-        {
-            if (input()->isDown(Key::Return) || input()->isDown(0, GamepadBtn::Start))
+                computer->update(delta);
+                player->update(delta);
+            } break;
+
+            case State::Gameover:
             {
-                reset();
-                state = State::Gameplay; // already set in reset, but here to state intention
-            }
+                if (input()->isDown(Key::Return) || input()->isDown(0, GamepadBtn::Start))
+                {
+                    reset();
+                    state = State::Gameplay; // already set in reset, but here to state intention
+                }
+            } break;
         }
     }
 
@@ -203,14 +208,13 @@ protected:
         window()->getSize(&w, &h);
 
         batch.begin(cam.getMatrix());
-
-
             player->draw(&batch);
             computer->draw(&batch);
             ball->draw(&batch);
 
             batch.drawText(scoreText[0], {128.f, 16.f});
             batch.drawText(scoreText[1], {(float)w - scoreText[1].currentSize().x - 128.f, 16.f});
+
 
             if (state == State::Gameover)
             {
