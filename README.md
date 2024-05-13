@@ -4,7 +4,12 @@ Demos for [SDGL](https://github.com/tadashibashi/sdgl): Simple Direct Game Libra
 
 ### [Pong](https://aaronishibashi.com/portfolio/games/pong3)
 
-[![Pong Animation](res/pong.gif)](https://aaronishibashi.com/portfolio/games/pong3)
+[![Pong Animation Preview](res/pong.gif)](https://aaronishibashi.com/portfolio/games/pong3)
+
+Simple pong clone, with computer ai
+
+*Controls:*
+- Up/Down to move paddle
 
 ## Building from source
 
