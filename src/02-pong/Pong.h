@@ -215,7 +215,6 @@ protected:
             batch.drawText(scoreText[0], {128.f, 16.f});
             batch.drawText(scoreText[1], {(float)w - scoreText[1].currentSize().x - 128.f, 16.f});
 
-
             if (state == State::Gameover)
             {
                 const auto textSize = scoreText[2].currentSize();
