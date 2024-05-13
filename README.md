@@ -1,6 +1,6 @@
 # SDGL Examples
 
-Demos for Simple Direct Game Library
+Demos for [SDGL](https://github.com/tadashibashi/sdgl): Simple Direct Game Library
 
 ### [Pong](https://aaronishibashi.com/portfolio/games/pong3)
 
