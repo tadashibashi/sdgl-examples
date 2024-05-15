@@ -240,6 +240,14 @@ protected:
 
     void shutdown() override
     {
+        audio()->destroySound(sndPaddleHit[0]);
+        audio()->destroySound(sndPaddleHit[1]);
+        audio()->destroySound(sndWallHit);
+        audio()->destroySound(sndScore[0]);
+        audio()->destroySound(sndWin[0]);
+        audio()->destroySound(sndScore[1]);
+        audio()->destroySound(sndWin[1]);
+
         delete player;
         delete computer;
         delete ball;
